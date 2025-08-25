@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { utilisateurs as users } from "./auth";
 import bcrypt from "bcryptjs";
+import { utilisateurs as defaultUsers, produits as defaultProduits } from "./data";
 
 function App() {
   // --- PRODUITS ---
   const [produits, setProduits] = useState(() => {
     const saved = localStorage.getItem("produits");
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : defaultProduits;
   });
   const [nom, setNom] = useState("");
   const [quantite, setQuantite] = useState("");
@@ -24,7 +24,7 @@ function App() {
   // --- UTILISATEURS ---
   const [utilisateurs, setUtilisateurs] = useState(() => {
     const saved = localStorage.getItem("utilisateurs");
-    return saved ? JSON.parse(saved) : users;
+    return saved ? JSON.parse(saved) : defaultUsers;
   });
   const [newUser, setNewUser] = useState({ username: "", password: "" });
 
@@ -55,6 +55,7 @@ function App() {
   const produitsFiltres = produits.filter(p =>
     p.nom.toLowerCase().includes(recherche.toLowerCase())
   );
+
   const produitsFiltresTries = [...produitsFiltres].sort((a, b) => {
     let valA = a[tri.champ];
     let valB = b[tri.champ];
@@ -63,6 +64,7 @@ function App() {
     if (valA > valB) return tri.ordre === "asc" ? 1 : -1;
     return 0;
   });
+
   const trierProduits = (champ) => {
     const ordre = tri.champ === champ && tri.ordre === "asc" ? "desc" : "asc";
     setTri({ champ, ordre });
@@ -73,10 +75,11 @@ function App() {
     if (!produits.length) return alert("Aucun produit à exporter !");
     const header = ["Nom", "Quantité", "Prix unitaire", "Total"];
     const rows = produits.map(p => [p.nom, p.quantite, p.prix, p.quantite * p.prix]);
-    const csvContent = "data:text/csv;charset=utf-8," + [header, ...rows].map(e => e.join(",")).join("\n");
-    const encodedUri = encodeURI(csvContent);
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [header, ...rows].map(e => e.join(",")).join("\n");
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
+    link.setAttribute("href", encodeURI(csvContent));
     link.setAttribute("download", "stock.csv");
     document.body.appendChild(link);
     link.click();
@@ -115,7 +118,7 @@ function App() {
         <input type="text" placeholder="Nom d'utilisateur" value={username} onChange={(e) => setUsername(e.target.value)} />
         <input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
         <button onClick={login}>Se connecter</button>
-        <p className="info">Admin: admin / 1234</p>
+        <p className="info">Admin: admin / 1234 | User: user1 / pass123</p>
       </div>
     );
   }
@@ -132,7 +135,12 @@ function App() {
       {alerte && <div className="alerte">{alerte}</div>}
 
       <div className="form-recherche">
-        <input type="text" placeholder="Rechercher un produit..." value={recherche} onChange={(e) => setRecherche(e.target.value)} />
+        <input
+          type="text"
+          placeholder="Rechercher un produit..."
+          value={recherche}
+          onChange={(e) => setRecherche(e.target.value)}
+        />
       </div>
 
       <div style={{ textAlign: "center" }}>
