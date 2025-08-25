@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { utilisateurs as users } from "./auth";
 import bcrypt from "bcryptjs";
 
 function App() {
@@ -23,9 +24,7 @@ function App() {
   // --- UTILISATEURS ---
   const [utilisateurs, setUtilisateurs] = useState(() => {
     const saved = localStorage.getItem("utilisateurs");
-    return saved
-      ? JSON.parse(saved)
-      : [{ username: "admin", password: bcrypt.hashSync("1234", 10) }];
+    return saved ? JSON.parse(saved) : users;
   });
   const [newUser, setNewUser] = useState({ username: "", password: "" });
 
@@ -56,7 +55,6 @@ function App() {
   const produitsFiltres = produits.filter(p =>
     p.nom.toLowerCase().includes(recherche.toLowerCase())
   );
-
   const produitsFiltresTries = [...produitsFiltres].sort((a, b) => {
     let valA = a[tri.champ];
     let valB = b[tri.champ];
@@ -65,7 +63,6 @@ function App() {
     if (valA > valB) return tri.ordre === "asc" ? 1 : -1;
     return 0;
   });
-
   const trierProduits = (champ) => {
     const ordre = tri.champ === champ && tri.ordre === "asc" ? "desc" : "asc";
     setTri({ champ, ordre });
@@ -76,9 +73,7 @@ function App() {
     if (!produits.length) return alert("Aucun produit à exporter !");
     const header = ["Nom", "Quantité", "Prix unitaire", "Total"];
     const rows = produits.map(p => [p.nom, p.quantite, p.prix, p.quantite * p.prix]);
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [header, ...rows].map(e => e.join(",")).join("\n");
+    const csvContent = "data:text/csv;charset=utf-8," + [header, ...rows].map(e => e.join(",")).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -137,12 +132,7 @@ function App() {
       {alerte && <div className="alerte">{alerte}</div>}
 
       <div className="form-recherche">
-        <input
-          type="text"
-          placeholder="Rechercher un produit..."
-          value={recherche}
-          onChange={(e) => setRecherche(e.target.value)}
-        />
+        <input type="text" placeholder="Rechercher un produit..." value={recherche} onChange={(e) => setRecherche(e.target.value)} />
       </div>
 
       <div style={{ textAlign: "center" }}>
