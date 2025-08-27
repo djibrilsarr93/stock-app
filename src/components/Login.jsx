@@ -1,5 +1,5 @@
-// src/components/Login.jsx
 import { useState } from "react";
+import { supabase } from "../supabaseClient";
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -16,18 +16,21 @@ export default function Login({ onLogin }) {
 
   return (
     <div className="login-container">
-      <div className="login-card">
-        <h2>Inventory Management</h2>
-        <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-        <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
-        <button onClick={handleLogin} disabled={loading}>{loading ? "Loading..." : "Sign In"}</button>
-      </div>
+      <h2>Inventory Management</h2>
+      <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
+      <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
+      <button onClick={handleLogin} disabled={loading}>
+        {loading ? "Loading..." : "Sign In"}
+      </button>
+
       <style>{`
-        .login-container{display:flex;justify-content:center;align-items:center;height:100vh;background:#f0f2f5;}
-        .login-card{background:white;padding:40px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.1);width:350px;text-align:center;}
-        input{width:100%;padding:12px;margin-bottom:15px;border-radius:6px;border:1px solid #ccc;}
-        button{width:100%;padding:12px;border:none;border-radius:6px;background:#27ae60;color:white;cursor:pointer;}
-        button:disabled{opacity:.6;cursor:not-allowed;}
+        .login-container {
+          display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;
+          gap:12px; font-family:Arial; background:linear-gradient(135deg,#6a11cb 0%,#2575fc 100%);
+        }
+        input { padding:12px; width:250px; border-radius:6px; border:1px solid #ccc; }
+        button { padding:12px 24px; border:none; border-radius:6px; background:#27ae60; color:white; cursor:pointer; }
+        button:disabled { opacity:0.6; cursor:not-allowed; }
       `}</style>
     </div>
   );
