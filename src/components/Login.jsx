@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
+import { Lock, Mail } from "lucide-react"; // icônes modernes
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -8,30 +9,95 @@ export default function Login({ onLogin }) {
 
   const handleLogin = async () => {
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setLoading(false);
+      return alert(error.message);
+    }
+
+    const user = data.user;
+
+    const { data: profile } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
     setLoading(false);
-    if (error) return alert(error.message);
-    onLogin(data.user);
+    onLogin({ ...user, role: profile?.role });
   };
 
   return (
-    <div className="login-container">
-      <h2>Inventory Management</h2>
-      <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-      <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
-      <button onClick={handleLogin} disabled={loading}>
-        {loading ? "Loading..." : "Sign In"}
-      </button>
+    <div className="flex min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-100">
+      {/* Section gauche (branding) */}
+      <div className="hidden w-1/2 bg-indigo-600 p-12 text-white lg:flex flex-col justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">📦 Stock-App</h1>
+          <p className="mt-4 text-lg text-indigo-100">
+            Gérez vos stocks en toute simplicité avec une interface moderne et sécurisée.
+          </p>
+        </div>
+        <div className="text-sm opacity-80">
+          © {new Date().getFullYear()} Stock-App. Tous droits réservés.
+        </div>
+      </div>
 
-      <style>{`
-        .login-container {
-          display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;
-          gap:12px; font-family:Arial; background:linear-gradient(135deg,#6a11cb 0%,#2575fc 100%);
-        }
-        input { padding:12px; width:250px; border-radius:6px; border:1px solid #ccc; }
-        button { padding:12px 24px; border:none; border-radius:6px; background:#27ae60; color:white; cursor:pointer; }
-        button:disabled { opacity:0.6; cursor:not-allowed; }
-      `}</style>
+      {/* Section droite (formulaire) */}
+      <div className="flex w-full flex-col items-center justify-center p-8 lg:w-1/2">
+        <div className="w-full max-w-md rounded-2xl bg-white p-10 shadow-2xl">
+          <h2 className="mb-6 text-center text-3xl font-extrabold text-gray-800">
+            Bienvenue 👋
+          </h2>
+          <p className="mb-8 text-center text-gray-500">
+            Connectez-vous pour accéder au dashboard.
+          </p>
+
+          {/* Email */}
+          <div className="mb-4 flex items-center rounded-lg border border-gray-300 bg-gray-50 px-3">
+            <Mail className="mr-2 h-5 w-5 text-gray-400" />
+            <input
+              type="email"
+              placeholder="Adresse email"
+              className="w-full border-0 bg-gray-50 p-3 focus:outline-none"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          {/* Password */}
+          <div className="mb-6 flex items-center rounded-lg border border-gray-300 bg-gray-50 px-3">
+            <Lock className="mr-2 h-5 w-5 text-gray-400" />
+            <input
+              type="password"
+              placeholder="Mot de passe"
+              className="w-full border-0 bg-gray-50 p-3 focus:outline-none"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          {/* Bouton */}
+          <button
+            onClick={handleLogin}
+            disabled={loading}
+            className="w-full rounded-lg bg-indigo-600 py-3 font-semibold text-white shadow-lg transition hover:bg-indigo-700 disabled:opacity-50"
+          >
+            {loading ? "Connexion..." : "Se connecter"}
+          </button>
+
+          {/* Lien inscription / reset */}
+          <p className="mt-6 text-center text-sm text-gray-500">
+            Pas de compte ?{" "}
+            <span className="cursor-pointer text-indigo-600 hover:underline">
+              Contactez l’admin
+            </span>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
